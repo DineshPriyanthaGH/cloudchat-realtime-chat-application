@@ -53,19 +53,19 @@ const Index = () => {
 
   const testimonials = [
     {
-      name: "Sarah Chen",
+      name: "S.M Perera",
       role: "Product Manager",
       content: "CloudChat transformed how our team communicates. The security features give us peace of mind.",
       rating: 5
     },
     {
-      name: "Marcus Rodriguez",
+      name: "Srimal Rodrigo",
       role: "Startup Founder",
       content: "Finally, a chat app that just works. Clean, fast, and incredibly reliable.",
       rating: 5
     },
     {
-      name: "Emily Watson",
+      name: "P.M.B. Fernando",
       role: "Remote Team Lead",
       content: "The best messaging platform we've used. Our productivity has increased significantly.",
       rating: 5
