@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import UserList from "../components/UserList";
 import { getAuth, signOut } from "firebase/auth";
+import ChatRoom from "../components/ChatRoom";
 import { useNavigate } from "react-router-dom";
 
 interface UserProfile {
@@ -50,6 +51,7 @@ const Profile = () => {
         <div className="flex-1 h-screen flex items-center justify-center bg-black">
           {selectedUser ? (
               <div className="flex-1 h-screen flex items-center justify-center">
+                <ChatRoom chatId={getChatId(currentUser.uid, selectedUser.uid)} />
               </div>
           )  : (
               <div className="text-gray-400">Select a user or group to start chatting</div>
