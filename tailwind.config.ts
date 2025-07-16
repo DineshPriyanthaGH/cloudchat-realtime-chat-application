@@ -61,7 +61,10 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+				'chat-bg': '#ece5dd', // WhatsApp chat background
+				'whatsapp-green': '#25d366',
+				'whatsapp-dark': '#075e54',
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

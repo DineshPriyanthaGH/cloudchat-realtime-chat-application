@@ -15,6 +15,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Separator } from "./ui/separator";
 import { Eye, EyeOff, Mail, Lock, User, Chrome } from "lucide-react";
 import { useToast } from "../hooks/use-toast";
+import {useNavigate} from "react-router-dom";
+import {saveUserProfile} from "../lib/userProfile.ts";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -32,6 +34,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [formData, setFormData] = useState({ name: '', email: '', password: '', confirmPassword: '' });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -53,6 +56,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       if (mode === "signup") {
         await createUserWithEmailAndPassword(auth, formData.email, formData.password);
         if (auth.currentUser) await updateProfile(auth.currentUser, { displayName: formData.name });
+        if (auth.currentUser) await saveUserProfile(auth.currentUser);
         toast({ title: "Account created!", description: "Your CloudChat account has been created." });
       } else {
         await signInWithEmailAndPassword(auth, formData.email, formData.password);
@@ -61,6 +65,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       onClose();
       setFormData({ name: '', email: '', password: '', confirmPassword: '' });
       setErrors({});
+      navigate("/profile");
     } catch (error: any) {
       setErrors({ email: error.message });
     } finally {
@@ -74,6 +79,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       await signInWithPopup(auth, googleProvider);
       toast({ title: "Google sign-in successful!", description: "You've been signed in with Google." });
       onClose();
+      navigate("/profile");
     } catch (error: any) {
       toast({ title: "Sign-in failed", description: error.message, variant: "destructive" });
     } finally {

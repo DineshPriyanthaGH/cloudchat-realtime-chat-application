@@ -1,4 +1,4 @@
-import { useState } from "react";
+import {useEffect, useState} from "react";
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
@@ -13,11 +13,36 @@ import {
   Quote
 } from "lucide-react";
 import { AuthModal } from "../components/AuthModal";
+import {getAuth} from "firebase/auth";
+import ChatRoom from "../components/ChatRoom";
+import UserList from "../components/UserList";
 
+interface UserProfile {
+  uid: string;
+  displayName: string;
+  email: string;
+  photoURL?: string;
+}
 const Index = () => {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signup');
+  const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
+  const [currentUser, setCurrentUser] = useState<any>(null);
 
+  useEffect(() => {
+    const auth = getAuth();
+    setCurrentUser(auth.currentUser);
+    // Listen for auth state changes
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      setCurrentUser(user);
+      setSelectedUser(null); // Reset selected user on login/logout
+    });
+    return () => unsubscribe();
+  }, []);
+
+  function getChatId(uid1: string, uid2: string) {
+    return [uid1, uid2].sort().join("_");
+  }
   const features = [
     {
       icon: Zap,
@@ -76,7 +101,23 @@ const Index = () => {
     setAuthMode(mode);
     setShowAuthModal(true);
   };
-
+  // If logged in, show user list and chat
+  if (currentUser) {
+    return (
+        <div className="min-h-screen flex">
+          <div className="w-1/3 border-r p-4 bg-white/80">
+            <UserList onSelectUser={setSelectedUser} />
+          </div>
+          <div className="flex-1 flex items-center justify-center">
+            {selectedUser ? (
+                <ChatRoom chatId={getChatId(currentUser.uid, selectedUser.uid)} />
+            ) : (
+                <div className="text-gray-400">Select a user to start chatting</div>
+            )}
+          </div>
+        </div>
+    );
+  }
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
       {/* Subtle background decoration */}
