@@ -64,16 +64,39 @@ const UserList: React.FC<UserListProps> = ({ onSelectUser ,onSelectGroup}) => {
 
   const handleCreateGroup = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!groupName.trim() || selectedMembers.length === 0 || !currentUser) return;
-    await addDoc(collection(db, "groups"), {
-      name: groupName,
-      members: [currentUser.uid, ...selectedMembers],
-      createdAt: serverTimestamp(),
-    });
-    setShowGroupModal(false);
-    setGroupName("");
-    setSelectedMembers([]);
+
+    if (!groupName.trim() || selectedMembers.length === 0 || !currentUser) {
+      alert("Please provide a group name and select at least one member.");
+      return;
+    }
+
+    try {
+      const groupRef = await addDoc(collection(db, "groups"), {
+        name: groupName,
+        members: [currentUser.uid, ...selectedMembers],
+        createdAt: serverTimestamp(),
+      });
+
+      console.log("Group created with ID:", groupRef.id);
+
+      // Reset state
+      setShowGroupModal(false);
+      setGroupName("");
+      setSelectedMembers([]);
+
+      // Optionally refresh group list
+      const updatedGroups = await getDocs(
+          query(collection(db, "groups"), where("members", "array-contains", currentUser.uid))
+      );
+      const groupList: Group[] = updatedGroups.docs.map(doc => ({ id: doc.id, ...(doc.data() as any) }));
+      setGroups(groupList);
+
+    } catch (error) {
+      console.error("Error creating group:", error);
+      alert("Failed to create group: " + (error as any).message);
+    }
   };
+
 
   if (loading) return <div>Loading users...</div>;
 
