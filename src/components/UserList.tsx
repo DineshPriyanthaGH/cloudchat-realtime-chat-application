@@ -16,6 +16,7 @@ interface Group {
   name: string;
   members: string[];
 }
+
 interface UserListProps {
   onSelectUser: (user: UserProfile) => void;
   onSelectGroup?: (group: Group) => void;
@@ -54,12 +55,13 @@ const UserList: React.FC<UserListProps> = ({ onSelectUser ,onSelectGroup}) => {
       setLoading(false);
     };
     fetchUsersAndGroups();
-  }, [currentUser,showGroupModal]);
+  }, [currentUser]);
 
   const handleLogout = async () => {
     await signOut(auth);
     navigate("/");
   };
+
   const handleCreateGroup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!groupName.trim() || selectedMembers.length === 0 || !currentUser) return;
@@ -72,7 +74,6 @@ const UserList: React.FC<UserListProps> = ({ onSelectUser ,onSelectGroup}) => {
     setGroupName("");
     setSelectedMembers([]);
   };
-
 
   if (loading) return <div>Loading users...</div>;
 

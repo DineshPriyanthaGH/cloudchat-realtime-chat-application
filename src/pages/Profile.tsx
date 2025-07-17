@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import UserList from "../components/UserList";
 import { getAuth, signOut } from "firebase/auth";
@@ -16,6 +17,7 @@ interface Group {
   name: string;
   members: string[];
 }
+
 const Profile = () => {
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
@@ -74,7 +76,6 @@ const Profile = () => {
         </div>
       </div>
   );
-
 };
 
 export default Profile; 
