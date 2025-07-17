@@ -16,6 +16,7 @@ import { AuthModal } from "../components/AuthModal";
 import {getAuth} from "firebase/auth";
 import ChatRoom from "../components/ChatRoom";
 import UserList from "../components/UserList";
+import GroupChatRoom from "../components/GroupChatRoom.tsx";
 
 interface UserProfile {
   uid: string;
@@ -28,6 +29,7 @@ const Index = () => {
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signup');
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [selectedTab, setSelectedTab] = useState<'private' | 'group'>('private');
 
   useEffect(() => {
     const auth = getAuth();
@@ -102,22 +104,7 @@ const Index = () => {
     setShowAuthModal(true);
   };
   // If logged in, show user list and chat
-  if (currentUser) {
-    return (
-        <div className="min-h-screen flex">
-          <div className="w-1/3 border-r p-4 bg-white/80">
-            <UserList onSelectUser={setSelectedUser} />
-          </div>
-          <div className="flex-1 flex items-center justify-center">
-            {selectedUser ? (
-                <ChatRoom chatId={getChatId(currentUser.uid, selectedUser.uid)} />
-            ) : (
-                <div className="text-gray-400">Select a user to start chatting</div>
-            )}
-          </div>
-        </div>
-    );
-  }
+
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
       {/* Subtle background decoration */}
