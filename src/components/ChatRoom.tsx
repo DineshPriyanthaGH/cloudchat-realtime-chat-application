@@ -49,43 +49,94 @@ const ChatRoom: React.FC<{ chatId?: string }> = ({ chatId = "global" }) => {
   };
 
   return (
-    <div className="flex flex-col h-full w-full flex-1 border rounded-2xl bg-chat-bg shadow-lg p-2">
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
-        {loading ? (
-          <div className="text-center text-gray-400">Loading messages...</div>
-        ) : (
-          messages.map((msg) => {
-            const isMe = msg.sender === (user?.displayName || user?.email);
-            return (
-              <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
-                <div className={`rounded-2xl px-4 py-2 max-w-xs shadow
-                  ${isMe ? 'bg-whatsapp-green text-white' : 'bg-white text-gray-900 border'}`}>
-                  <div className="text-xs opacity-70 mb-1">{msg.sender}</div>
-                  <div>{msg.text}</div>
-                  {msg.createdAt?.toDate && (
-                    <div className="text-[10px] opacity-60 mt-1 text-right">{msg.createdAt.toDate().toLocaleTimeString()}</div>
-                  )}
-                </div>
+      <div className="flex flex-col h-full w-full flex-1 border rounded-3xl bg-white shadow-lg p-6 font-sans">
+        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6 scrollbar-thin scrollbar-thumb-green-500 scrollbar-track-green-100">
+          {loading ? (
+              <div className="text-center text-gray-400 text-lg font-medium tracking-wide">
+                Loading messages...
               </div>
-            );
-          })
-        )}
-        <div ref={messagesEndRef} />
+          ) : (
+              messages.map((msg) => {
+                const isMe = msg.sender === (user?.displayName || user?.email);
+                return (
+                    <div
+                        key={msg.id}
+                        className={`flex flex-col max-w-md ${
+                            isMe ? "items-end ml-auto" : "items-start mr-auto"
+                        }`}
+                    >
+                      {/* Sender name above bubble */}
+                      <div
+                          className={`text-[11px] font-medium mb-1 select-none tracking-wide uppercase ${
+                              isMe ? "text-green-700" : "text-gray-500"
+                          }`}
+                          style={{ fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif", letterSpacing: "0.05em" }}
+                      >
+                        {msg.sender}
+                      </div>
+
+                      {/* Message bubble */}
+                      <div
+                          className={`relative rounded-3xl px-6 py-4 shadow-md break-words leading-relaxed text-[1rem] ${
+                              isMe
+                                  ? "bg-green-600 text-white"
+                                  : "bg-white text-gray-900 border border-gray-300"
+                          }`}
+                          style={{ wordBreak: "break-word" }}
+                      >
+                        {msg.text}
+                        {/* Tail */}
+                        <div
+                            className={`absolute bottom-0 w-3 h-3 bg-transparent ${
+                                isMe
+                                    ? "-right-1 rounded-bl-[16px] bg-green-600"
+                                    : "-left-1 rounded-br-[16px] bg-white border border-gray-300"
+                            }`}
+                            style={{ transform: "translateY(50%)" }}
+                        />
+                      </div>
+
+                      {/* Timestamp */}
+                      {msg.createdAt?.toDate && (
+                          <div
+                              className={`text-[11px] opacity-60 mt-1 font-mono select-none ${
+                                  isMe ? "text-green-700 text-right" : "text-gray-500 text-left"
+                              }`}
+                          >
+                            {msg.createdAt.toDate().toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </div>
+                      )}
+                    </div>
+                );
+              })
+          )}
+          <div ref={messagesEndRef} />
+        </div>
+        <form
+            onSubmit={handleSend}
+            className="flex gap-4 p-5 border-t border-gray-200 bg-white rounded-b-3xl shadow-inner"
+        >
+          <input
+              type="text"
+              className="flex-1 px-5 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-4 focus:ring-green-400 transition text-gray-700 placeholder-gray-400"
+              placeholder="Type a message..."
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              disabled={!user}
+              autoComplete="off"
+          />
+          <Button
+              type="submit"
+              disabled={!user || !newMessage.trim()}
+              className="bg-green-600 hover:bg-green-700 text-white rounded-full px-8 py-3 shadow-lg transition-transform active:scale-95"
+          >
+            Send
+          </Button>
+        </form>
       </div>
-      <form onSubmit={handleSend} className="flex gap-2 p-3 border-t bg-white rounded-b-2xl">
-        <input
-          type="text"
-          className="flex-1 px-3 py-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-whatsapp-green"
-          placeholder="Type a message..."
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-          disabled={!user}
-        />
-        <Button type="submit" disabled={!user || !newMessage.trim()} className="bg-whatsapp-green hover:bg-whatsapp-dark text-white rounded-full px-6">
-          Send
-        </Button>
-      </form>
-    </div>
   );
 };
 

@@ -78,87 +78,125 @@ const UserList: React.FC<UserListProps> = ({ onSelectUser ,onSelectGroup}) => {
   if (loading) return <div>Loading users...</div>;
 
   return (
-      <div className="h-full flex flex-col bg-white border-r shadow-md rounded-l-lg">
-        {/* WhatsApp-style green header */}
-        <div className="bg-whatsapp-dark text-white px-4 py-3 flex items-center gap-3 rounded-t-lg shadow">
-          <img src={currentUser?.photoURL || '/default-avatar.png'} alt="avatar" className="w-10 h-10 rounded-full border-2 border-white" />
+      <div className="flex flex-col h-full bg-white border-r shadow-lg rounded-l-lg overflow-hidden">
+        {/* Header */}
+        <div className="bg-green-700 text-white px-5 py-4 flex items-center gap-4 rounded-t-lg shadow-md">
+          <img
+              src={currentUser?.photoURL || "/default-avatar.png"}
+              alt="avatar"
+              className="w-12 h-12 rounded-full border-2 border-white object-cover"
+          />
           <div>
-            <div className="font-bold">{currentUser?.displayName || currentUser?.email}</div>
-            <div className="text-xs opacity-80">Online</div>
+            <h2 className="font-semibold text-lg leading-tight">{currentUser?.displayName || currentUser?.email}</h2>
+            <p className="text-sm opacity-80">Online</p>
           </div>
-          <Button onClick={handleLogout} className="ml-auto bg-whatsapp-dark hover:bg-whatsapp-green text-white" size="sm">Logout</Button>
+          <Button
+              onClick={handleLogout}
+              className="ml-auto bg-white text-green-700 font-semibold hover:bg-green-100 px-4 py-1 rounded-lg shadow-sm transition"
+              size="sm"
+          >
+            Logout
+          </Button>
         </div>
-        <div className="px-2 pt-2 pb-4 flex-1 overflow-y-auto">
-          <div className="flex items-center justify-between mb-2">
-            <h2 className="font-bold text-whatsapp-dark">Groups</h2>
-            <Button size="sm" className="bg-whatsapp-green text-white" onClick={() => setShowGroupModal(true)}>+ Create Group</Button>
+
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto px-4 py-3 space-y-5">
+          <div className="flex justify-between items-center">
+            <h3 className="text-green-800 font-bold text-lg">Groups</h3>
+            <Button
+                size="sm"
+                className="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-1 rounded-lg shadow"
+                onClick={() => setShowGroupModal(true)}
+            >
+              + Create Group
+            </Button>
           </div>
-          <ul className="bg-white rounded-lg mb-4">
+          <ul className="divide-y divide-gray-200 rounded-lg bg-gray-50 shadow-inner">
             {groups.map((group) => (
                 <li
                     key={group.id}
-                    className="flex items-center gap-3 px-4 py-2 cursor-pointer hover:bg-green-100 border-b transition"
                     onClick={() => onSelectGroup && onSelectGroup(group)}
+                    className="cursor-pointer px-4 py-3 hover:bg-green-100 transition rounded"
                 >
-                  <span className="font-medium">{group.name}</span>
+                  <span className="text-green-900 font-medium">{group.name}</span>
                 </li>
             ))}
           </ul>
-          <h2 className="font-bold mb-2 text-whatsapp-dark">Users</h2>
-          <ul className="bg-white rounded-lg">
+
+          <h3 className="text-green-800 font-bold text-lg mt-6 mb-2">Users</h3>
+          <ul className="divide-y divide-gray-200 rounded-lg bg-gray-50 shadow-inner">
             {users.map((user) => (
                 <li
                     key={user.uid}
-                    className="flex items-center gap-3 px-4 py-2 cursor-pointer hover:bg-green-100 border-b transition"
                     onClick={() => onSelectUser(user)}
+                    className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-green-100 transition rounded"
                 >
-                  <img src={user.photoURL || '/default-avatar.png'} alt="avatar" className="w-8 h-8 rounded-full" />
-                  <span className="font-medium">{user.displayName || user.email}</span>
+                  <img
+                      src={user.photoURL || "/default-avatar.png"}
+                      alt="avatar"
+                      className="w-9 h-9 rounded-full object-cover"
+                  />
+                  <span className="text-gray-900 font-semibold">{user.displayName || user.email}</span>
                 </li>
             ))}
           </ul>
         </div>
-        {/* Group creation modal */}
+
+        {/* Group Modal */}
         {showGroupModal && (
-            <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-              <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-                <h2 className="text-xl font-bold mb-4">Create Group</h2>
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-8 space-y-6">
+                <h2 className="text-2xl font-bold text-green-700">Create Group</h2>
                 <form onSubmit={handleCreateGroup} className="space-y-4">
                   <input
                       type="text"
-                      className="w-full border rounded px-3 py-2"
+                      className="w-full border border-green-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-400"
                       placeholder="Group name"
                       value={groupName}
-                      onChange={e => setGroupName(e.target.value)}
+                      onChange={(e) => setGroupName(e.target.value)}
                       required
                   />
                   <div>
-                    <div className="font-semibold mb-2">Select members:</div>
-                    <div className="max-h-40 overflow-y-auto">
-                      {users.map(user => (
-                          <label key={user.uid} className="flex items-center gap-2 mb-1">
+                    <p className="font-semibold mb-2 text-gray-700">Select members:</p>
+                    <div className="max-h-48 overflow-y-auto border border-green-200 rounded-lg p-2">
+                      {users.map((user) => (
+                          <label
+                              key={user.uid}
+                              className="flex items-center gap-3 mb-2 cursor-pointer hover:bg-green-50 rounded px-2 py-1"
+                          >
                             <input
                                 type="checkbox"
                                 checked={selectedMembers.includes(user.uid)}
-                                onChange={e => {
-                                  if (e.target.checked) setSelectedMembers(prev => [...prev, user.uid]);
-                                  else setSelectedMembers(prev => prev.filter(uid => uid !== user.uid));
+                                onChange={(e) => {
+                                  if (e.target.checked) setSelectedMembers((prev) => [...prev, user.uid]);
+                                  else setSelectedMembers((prev) => prev.filter((uid) => uid !== user.uid));
                                 }}
+                                className="form-checkbox h-5 w-5 text-green-600"
                             />
-                            <span>{user.displayName || user.email}</span>
+                            <span className="text-gray-900">{user.displayName || user.email}</span>
                           </label>
                       ))}
                     </div>
                   </div>
-                  <div className="flex gap-2 justify-end">
-                    <Button type="button" variant="outline" onClick={() => setShowGroupModal(false)}>Cancel</Button>
-                    <Button type="submit" className="bg-whatsapp-green text-white">Create</Button>
+                  <div className="flex justify-end gap-3">
+                    <Button
+                        type="button"
+                        variant="outline"
+                        className="border-green-600 text-green-600 hover:bg-green-50"
+                        onClick={() => setShowGroupModal(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button type="submit" className="bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg px-5 py-2 shadow-lg">
+                      Create
+                    </Button>
                   </div>
                 </form>
               </div>
             </div>
         )}
       </div>
+
   );
 };
 
