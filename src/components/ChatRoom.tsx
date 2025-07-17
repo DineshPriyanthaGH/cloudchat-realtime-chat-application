@@ -10,6 +10,8 @@ import {
 import { getAuth } from "firebase/auth";
 import { db } from "../firebaseConfig";
 import { Button } from "./ui/button";
+import EmojiPicker from "emoji-picker-react";
+
 
 interface Message {
   id: string;
@@ -33,6 +35,8 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ chatId = "global", selectedUser }) 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const auth = getAuth();
   const user = auth.currentUser;
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+
 
   useEffect(() => {
     const q = query(
@@ -147,8 +151,28 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ chatId = "global", selectedUser }) 
         {/* 🕽️ Input bar */}
         <form
             onSubmit={handleSend}
-            className="flex gap-4 p-5 border-t border-gray-200 bg-white rounded-b-3xl shadow-inner"
+            className="relative flex gap-4 p-5 border-t border-gray-200 bg-white rounded-b-3xl shadow-inner"
         >
+          <button
+              type="button"
+              onClick={() => setShowEmojiPicker((prev) => !prev)}
+              className="text-2xl focus:outline-none"
+              title="Add Emoji"
+          >
+            😊
+          </button>
+
+          {showEmojiPicker && (
+              <div className="absolute bottom-20 left-5 z-50">
+                <EmojiPicker
+                    onEmojiClick={(emojiData) =>
+                        setNewMessage((prev) => prev + emojiData.emoji)
+                    }
+                    theme="light"
+                />
+              </div>
+          )}
+
           <input
               type="text"
               className="flex-1 px-5 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-4 focus:ring-green-400 transition text-gray-700 placeholder-gray-400"
