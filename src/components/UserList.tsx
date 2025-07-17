@@ -81,11 +81,7 @@ const UserList: React.FC<UserListProps> = ({ onSelectUser ,onSelectGroup}) => {
       <div className="flex flex-col h-full bg-white border-r shadow-lg rounded-l-lg overflow-hidden">
         {/* Header */}
         <div className="bg-green-700 text-white px-5 py-4 flex items-center gap-4 rounded-t-lg shadow-md">
-          <img
-              src={currentUser?.photoURL || "/default-avatar.png"}
-              alt="avatar"
-              className="w-12 h-12 rounded-full border-2 border-white object-cover"
-          />
+
           <div>
             <h2 className="font-semibold text-lg leading-tight">{currentUser?.displayName || currentUser?.email}</h2>
             <p className="text-sm opacity-80">Online</p>
