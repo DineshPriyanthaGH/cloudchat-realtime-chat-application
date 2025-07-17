@@ -99,45 +99,56 @@ const GroupChatRoom: React.FC<{ group: Group }> = ({ group }) => {
   };
 
   return (
-      <div className="flex flex-col h-full w-full flex-1 border rounded-3xl bg-white shadow-lg font-sans overflow-hidden">
+      <div className="flex flex-col h-full w-full flex-1 border rounded-3xl bg-background shadow-lg font-sans overflow-hidden">
         {/* Header */}
-        <div className="bg-green-700 p-3 rounded-t-xl flex items-center justify-between text-white shadow-md">
-          <div className="font-bold text-lg">{group.name}</div>
+        <div className="bg-primary text-primary-foreground p-4 rounded-t-3xl flex items-center gap-3 shadow">
+          <div className="font-bold text-xl">{group.name}</div>
           <div className="text-sm opacity-80">Group Chat</div>
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-5 scrollbar-thin scrollbar-thumb-green-400">
+        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6 scrollbar-thin scrollbar-thumb-green-500 scrollbar-track-green-100">
           {loading ? (
-              <div className="text-center text-gray-400">Loading messages...</div>
+              <div className="text-center text-gray-400 font-medium">Loading messages...</div>
           ) : (
               messages.map((msg) => {
                 const isMe = msg.sender === (user?.displayName || user?.email);
                 return (
-                    <div key={msg.id} className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
+                    <div
+                        key={msg.id}
+                        className={`flex flex-col max-w-md ${isMe ? "items-end ml-auto" : "items-start mr-auto"}`}
+                    >
                       <div
-                          className={`max-w-xs px-5 py-3 rounded-3xl shadow-md ${
-                              isMe ? "bg-green-600 text-white" : "bg-gray-100 text-gray-800"
+                          className={`text-[11px] font-medium mb-1 uppercase ${isMe ? "text-primary" : "text-muted-foreground"}`}
+                      >
+                        {msg.sender}
+                      </div>
+                      <div
+                          className={`relative rounded-3xl px-6 py-4 shadow break-words leading-relaxed text-base ${
+                              isMe
+                                  ? "bg-primary text-primary-foreground"
+                                  : "bg-muted text-muted-foreground border"
                           }`}
                       >
-                        <div className="text-xs font-semibold opacity-70 mb-1">{msg.sender}</div>
-                        {msg.text && <div>{msg.text}</div>}
+                        {msg.text}
                         {msg.imageUrl && (
                             <img
                                 src={msg.imageUrl}
-                                alt="attachment"
-                                className="mt-2 rounded-xl max-w-full border"
+                                alt="uploaded"
+                                className="mt-3 max-w-xs max-h-60 rounded-xl border"
                             />
                         )}
-                        {msg.createdAt?.toDate && (
-                            <div className="text-[10px] mt-1 opacity-50 text-right">
-                              {msg.createdAt.toDate().toLocaleTimeString([], {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              })}
-                            </div>
-                        )}
                       </div>
+                      {msg.createdAt?.toDate && (
+                          <div
+                              className={`text-[11px] mt-1 font-mono ${isMe ? "text-primary" : "text-muted-foreground"}`}
+                          >
+                            {msg.createdAt.toDate().toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </div>
+                      )}
                     </div>
                 );
               })
@@ -145,22 +156,22 @@ const GroupChatRoom: React.FC<{ group: Group }> = ({ group }) => {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input */}
+        {/* Input Section */}
         <form
             onSubmit={handleSend}
-            className="flex items-center gap-3 p-4 border-t border-gray-200 bg-white rounded-b-3xl shadow-inner"
+            className="relative flex gap-4 p-4 border-t bg-background rounded-b-3xl shadow-inner"
         >
           <button
               type="button"
-              onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-              className="text-2xl"
-              title="Emoji Picker"
+              onClick={() => setShowEmojiPicker((prev) => !prev)}
+              className="text-2xl focus:outline-none"
+              title="Add Emoji"
           >
             😊
           </button>
 
           {showEmojiPicker && (
-              <div className="absolute bottom-24 left-5 z-50">
+              <div className="absolute bottom-20 left-5 z-50">
                 <EmojiPicker
                     onEmojiClick={(emojiData) => setNewMessage((prev) => prev + emojiData.emoji)}
                     theme="light"
@@ -174,8 +185,13 @@ const GroupChatRoom: React.FC<{ group: Group }> = ({ group }) => {
               id="group-image-upload"
               className="hidden"
               onChange={(e) => setImage(e.target.files?.[0] || null)}
+              disabled={uploading}
           />
-          <label htmlFor="group-image-upload" className="text-xl cursor-pointer" title="Attach image">
+          <label
+              htmlFor="group-image-upload"
+              className="text-xl cursor-pointer"
+              title="Attach image"
+          >
             📎
           </label>
 
@@ -188,14 +204,15 @@ const GroupChatRoom: React.FC<{ group: Group }> = ({ group }) => {
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
               placeholder="Type your message..."
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-green-400"
+              className="flex-1 px-5 py-3 border border-gray-300 bg-gray-100 text-gray-700 placeholder-gray-500 rounded-full focus:outline-none focus:ring-2 focus:ring-gray-400 transition"
               disabled={uploading}
+              autoComplete="off"
           />
 
           <Button
               type="submit"
               disabled={!user || (!newMessage.trim() && !image) || uploading}
-              className="bg-green-600 hover:bg-green-700 text-white rounded-full px-6"
+              className="rounded-full px-8 py-4 text-lg animate-glow"
           >
             {uploading ? "Sending..." : "Send"}
           </Button>
