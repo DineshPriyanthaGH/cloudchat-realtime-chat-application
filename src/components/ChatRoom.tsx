@@ -12,12 +12,12 @@ import { db } from "../firebaseConfig";
 import { Button } from "./ui/button";
 import EmojiPicker from "emoji-picker-react";
 
-
 interface Message {
   id: string;
   text: string;
   sender: string;
   createdAt: any;
+  imageUrl?: string;
 }
 
 interface ChatRoomProps {
@@ -37,6 +37,25 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ chatId = "global", selectedUser }) 
   const user = auth.currentUser;
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
+  const [image, setImage] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const IMGBB_API_KEY = "866d197a9352670200efeb271c0d02be";
+
+  const uploadImageToImgbb = async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append("image", file);
+    const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+      method: "POST",
+      body: formData,
+    });
+    const data = await res.json();
+    if (data.success) {
+      return data.data.url;
+    } else {
+      throw new Error("Image upload failed");
+    }
+  };
 
   useEffect(() => {
     const q = query(
@@ -57,19 +76,36 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ chatId = "global", selectedUser }) 
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim() || !user) return;
-    await addDoc(collection(db, "chats", chatId, "messages"), {
-      text: newMessage,
-      sender: user.displayName || user.email || "Anonymous",
-      uid: user.uid,
-      createdAt: serverTimestamp(),
-    });
-    setNewMessage("");
+    if ((!newMessage.trim() && !image) || !user) return;
+
+    setUploading(true);
+    let imageUrl: string | null = null;
+
+    try {
+      if (image) {
+        imageUrl = await uploadImageToImgbb(image);
+      }
+
+      await addDoc(collection(db, "chats", chatId, "messages"), {
+        text: newMessage || "",
+        imageUrl,
+        sender: user.displayName || user.email || "Anonymous",
+        uid: user.uid,
+        createdAt: serverTimestamp(),
+      });
+
+      setNewMessage("");
+      setImage(null);
+    } catch (err: any) {
+      alert("Failed to send message: " + err.message);
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
       <div className="flex flex-col h-full w-full flex-1 border rounded-3xl bg-white shadow-lg font-sans overflow-hidden">
-        {/*  WhatsApp-style chat header */}
+        {/* Header */}
         <div className="bg-green-700 p-3 rounded-t-xl flex items-center gap-3 shadow-md">
           <div className="w-10 h-10 bg-blue-500 text-white flex items-center justify-center rounded-full font-semibold text-lg">
             {selectedUser?.displayName?.charAt(0).toUpperCase() || "C"}
@@ -82,7 +118,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ chatId = "global", selectedUser }) 
           </div>
         </div>
 
-        {/* 🟢 Chat messages */}
+        {/* Messages */}
         <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6 scrollbar-thin scrollbar-thumb-green-500 scrollbar-track-green-100">
           {loading ? (
               <div className="text-center text-gray-400 text-lg font-medium tracking-wide">
@@ -102,10 +138,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ chatId = "global", selectedUser }) 
                           className={`text-[11px] font-medium mb-1 select-none tracking-wide uppercase ${
                               isMe ? "text-green-700" : "text-gray-500"
                           }`}
-                          style={{
-                            fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-                            letterSpacing: "0.05em",
-                          }}
+                          style={{ fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" }}
                       >
                         {msg.sender}
                       </div>
@@ -119,6 +152,13 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ chatId = "global", selectedUser }) 
                           style={{ wordBreak: "break-word" }}
                       >
                         {msg.text}
+                        {msg.imageUrl && (
+                            <img
+                                src={msg.imageUrl}
+                                alt="uploaded"
+                                className="mt-3 max-w-xs max-h-60 rounded-xl border"
+                            />
+                        )}
                         <div
                             className={`absolute bottom-0 w-3 h-3 bg-transparent ${
                                 isMe
@@ -148,7 +188,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ chatId = "global", selectedUser }) 
           <div ref={messagesEndRef} />
         </div>
 
-        {/* 🕽️ Input bar */}
+        {/* Input */}
         <form
             onSubmit={handleSend}
             className="relative flex gap-4 p-5 border-t border-gray-200 bg-white rounded-b-3xl shadow-inner"
@@ -165,13 +205,28 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ chatId = "global", selectedUser }) 
           {showEmojiPicker && (
               <div className="absolute bottom-20 left-5 z-50">
                 <EmojiPicker
-                    onEmojiClick={(emojiData) =>
-                        setNewMessage((prev) => prev + emojiData.emoji)
-                    }
+                    onEmojiClick={(emojiData) => setNewMessage((prev) => prev + emojiData.emoji)}
                     theme="light"
                 />
               </div>
           )}
+
+          <input
+              type="file"
+              accept="image/*"
+              id="image-upload"
+              className="hidden"
+              onChange={(e) => {
+                if (e.target.files && e.target.files[0]) {
+                  setImage(e.target.files[0]);
+                }
+              }}
+              disabled={uploading}
+          />
+          <label htmlFor="image-upload" className="text-xl cursor-pointer" title="Attach image">
+            📎
+          </label>
+          {image && <span className="text-xs text-gray-500 mt-2">{image.name}</span>}
 
           <input
               type="text"
@@ -179,15 +234,15 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ chatId = "global", selectedUser }) 
               placeholder="Type a message..."
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
-              disabled={!user}
+              disabled={!user || uploading}
               autoComplete="off"
           />
           <Button
               type="submit"
-              disabled={!user || !newMessage.trim()}
+              disabled={!user || (!newMessage.trim() && !image) || uploading}
               className="bg-green-600 hover:bg-green-700 text-white rounded-full px-8 py-3 shadow-lg transition-transform active:scale-95"
           >
-            Send
+            {uploading ? "Sending..." : "Send"}
           </Button>
         </form>
       </div>
