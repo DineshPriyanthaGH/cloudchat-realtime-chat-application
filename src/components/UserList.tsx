@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
-import {addDoc, collection, getDocs, query,where, serverTimestamp} from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  getDocs,
+  query,
+  where,
+  serverTimestamp,
+} from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import { getAuth, signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
@@ -11,6 +18,7 @@ interface UserProfile {
   email: string;
   photoURL?: string;
 }
+
 interface Group {
   id: string;
   name: string;
@@ -22,7 +30,7 @@ interface UserListProps {
   onSelectGroup?: (group: Group) => void;
 }
 
-const UserList: React.FC<UserListProps> = ({ onSelectUser ,onSelectGroup}) => {
+const UserList: React.FC<UserListProps> = ({ onSelectUser, onSelectGroup }) => {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
   const [loading, setLoading] = useState(true);
@@ -35,7 +43,6 @@ const UserList: React.FC<UserListProps> = ({ onSelectUser ,onSelectGroup}) => {
 
   useEffect(() => {
     const fetchUsersAndGroups = async () => {
-      // Fetch users
       const querySnapshot = await getDocs(collection(db, "users"));
       const userList: UserProfile[] = [];
       querySnapshot.forEach((doc) => {
@@ -45,15 +52,23 @@ const UserList: React.FC<UserListProps> = ({ onSelectUser ,onSelectGroup}) => {
         }
       });
       setUsers(userList);
-      // Fetch groups
+
       if (currentUser) {
-        const groupQuery = query(collection(db, "groups"), where("members", "array-contains", currentUser.uid));
+        const groupQuery = query(
+            collection(db, "groups"),
+            where("members", "array-contains", currentUser.uid)
+        );
         const groupSnapshot = await getDocs(groupQuery);
-        const groupList: Group[] = groupSnapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as any) }));
+        const groupList: Group[] = groupSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...(doc.data() as any),
+        }));
         setGroups(groupList);
       }
+
       setLoading(false);
     };
+
     fetchUsersAndGroups();
   }, [currentUser]);
 
@@ -64,95 +79,181 @@ const UserList: React.FC<UserListProps> = ({ onSelectUser ,onSelectGroup}) => {
 
   const handleCreateGroup = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!groupName.trim() || selectedMembers.length === 0 || !currentUser) return;
-    await addDoc(collection(db, "groups"), {
-      name: groupName,
-      members: [currentUser.uid, ...selectedMembers],
-      createdAt: serverTimestamp(),
-    });
-    setShowGroupModal(false);
-    setGroupName("");
-    setSelectedMembers([]);
+
+    if (!groupName.trim() || selectedMembers.length === 0 || !currentUser) {
+      alert("Please provide a group name and select members.");
+      return;
+    }
+
+    try {
+      const groupRef = await addDoc(collection(db, "groups"), {
+        name: groupName,
+        members: [currentUser.uid, ...selectedMembers],
+        createdAt: serverTimestamp(),
+      });
+
+      console.log("Group created with ID:", groupRef.id);
+      setShowGroupModal(false);
+      setGroupName("");
+      setSelectedMembers([]);
+
+      const updatedGroups = await getDocs(
+          query(collection(db, "groups"), where("members", "array-contains", currentUser.uid))
+      );
+      const groupList: Group[] = updatedGroups.docs.map(doc => ({ id: doc.id, ...(doc.data() as any) }));
+      setGroups(groupList);
+
+    } catch (error) {
+      console.error("Error creating group:", error);
+      alert("Failed to create group.");
+    }
   };
 
   if (loading) return <div>Loading users...</div>;
 
   return (
-      <div className="h-full flex flex-col bg-white border-r shadow-md rounded-l-lg">
-        {/* WhatsApp-style green header */}
-        <div className="bg-whatsapp-dark text-white px-4 py-3 flex items-center gap-3 rounded-t-lg shadow">
-          <img src={currentUser?.photoURL || '/default-avatar.png'} alt="avatar" className="w-10 h-10 rounded-full border-2 border-white" />
+      <div className="flex flex-col h-full w-full flex-1 border rounded-3xl bg-background shadow-lg font-sans overflow-hidden">
+        {/* Header */}
+        <div className="bg-primary text-primary-foreground p-4 rounded-t-3xl flex items-center gap-3 shadow">
           <div>
-            <div className="font-bold">{currentUser?.displayName || currentUser?.email}</div>
-            <div className="text-xs opacity-80">Online</div>
+            <h2 className="text-lg font-semibold">{currentUser?.displayName || currentUser?.email}</h2>
+            <p className="text-sm opacity-80">Online</p>
           </div>
-          <Button onClick={handleLogout} className="ml-auto bg-whatsapp-dark hover:bg-whatsapp-green text-white" size="sm">Logout</Button>
+          <Button
+              onClick={handleLogout}
+              className="
+    inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium
+    ring-offset-background
+    transition-colors
+    focus-visible:outline-none
+    focus-visible:ring-2
+    focus-visible:ring-primary
+    focus-visible:ring-offset-2
+    disabled:pointer-events-none disabled:opacity-50
+    h-11 rounded-md
+    bg-white hover:bg-gray-100
+    text-slate-800
+    px-8 py-4
+    text-lg
+  "
+              size="sm"
+          >
+            Logout
+          </Button>
+
         </div>
-        <div className="px-2 pt-2 pb-4 flex-1 overflow-y-auto">
-          <div className="flex items-center justify-between mb-2">
-            <h2 className="font-bold text-whatsapp-dark">Groups</h2>
-            <Button size="sm" className="bg-whatsapp-green text-white" onClick={() => setShowGroupModal(true)}>+ Create Group</Button>
+
+        {/* Group List */}
+        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-6">
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg font-semibold">Groups</h3>
+            <Button
+                size="sm"
+                onClick={() => setShowGroupModal(true)}
+                className="
+    inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium
+    ring-offset-background
+    transition-colors
+    focus-visible:outline-none
+    focus-visible:ring-2
+    focus-visible:ring-primary
+    focus-visible:ring-offset-2
+    disabled:pointer-events-none disabled:opacity-50
+    h-11 rounded-md
+    bg-primary hover:bg-primary/90
+    text-primary-foreground
+    px-8 py-4
+    text-lg
+    animate-glow
+  "
+            >
+              + Create Group
+            </Button>
+
           </div>
-          <ul className="bg-white rounded-lg mb-4">
+          <ul className="space-y-2">
             {groups.map((group) => (
                 <li
                     key={group.id}
-                    className="flex items-center gap-3 px-4 py-2 cursor-pointer hover:bg-green-100 border-b transition"
                     onClick={() => onSelectGroup && onSelectGroup(group)}
+                    className="cursor-pointer px-4 py-2 bg-gray-900 hover:bg-white transition rounded-md"
                 >
-                  <span className="font-medium">{group.name}</span>
+      <span className="text-blue-300 hover:text-blue-600 font-medium transition">
+        {group.name}
+      </span>
                 </li>
             ))}
           </ul>
-          <h2 className="font-bold mb-2 text-whatsapp-dark">Users</h2>
-          <ul className="bg-white rounded-lg">
+
+          {/* User List */}
+          <h3 className="text-lg font-semibold">Users</h3>
+          <ul className="space-y-2">
             {users.map((user) => (
                 <li
                     key={user.uid}
-                    className="flex items-center gap-3 px-4 py-2 cursor-pointer hover:bg-green-100 border-b transition"
                     onClick={() => onSelectUser(user)}
+                    className="cursor-pointer px-4 py-2 bg-gray-900 hover:bg-white transition rounded-md"
                 >
-                  <img src={user.photoURL || '/default-avatar.png'} alt="avatar" className="w-8 h-8 rounded-full" />
-                  <span className="font-medium">{user.displayName || user.email}</span>
+      <span className="text-blue-300 hover:text-blue-600 font-medium transition">
+        {user.displayName || user.email}
+      </span>
                 </li>
             ))}
           </ul>
+
         </div>
-        {/* Group creation modal */}
+
+        {/* Group Modal */}
         {showGroupModal && (
             <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-              <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-                <h2 className="text-xl font-bold mb-4">Create Group</h2>
+              <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6 space-y-5">
+                <h2 className="text-2xl font-bold text-slate-800">Create Group</h2>
                 <form onSubmit={handleCreateGroup} className="space-y-4">
                   <input
                       type="text"
-                      className="w-full border rounded px-3 py-2"
                       placeholder="Group name"
+                      className="w-full border border-slate-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
                       value={groupName}
-                      onChange={e => setGroupName(e.target.value)}
+                      onChange={(e) => setGroupName(e.target.value)}
                       required
                   />
                   <div>
-                    <div className="font-semibold mb-2">Select members:</div>
-                    <div className="max-h-40 overflow-y-auto">
-                      {users.map(user => (
-                          <label key={user.uid} className="flex items-center gap-2 mb-1">
+                    <p className="font-semibold mb-2 text-slate-700">Select members:</p>
+                    <div className="max-h-48 overflow-y-auto border border-slate-200 rounded p-2">
+                      {users.map((user) => (
+                          <label
+                              key={user.uid}
+                              className="flex items-center gap-3 mb-2 cursor-pointer hover:bg-indigo-50 px-2 py-1 rounded"
+                          >
                             <input
                                 type="checkbox"
                                 checked={selectedMembers.includes(user.uid)}
-                                onChange={e => {
-                                  if (e.target.checked) setSelectedMembers(prev => [...prev, user.uid]);
-                                  else setSelectedMembers(prev => prev.filter(uid => uid !== user.uid));
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setSelectedMembers((prev) => [...prev, user.uid]);
+                                  } else {
+                                    setSelectedMembers((prev) => prev.filter((uid) => uid !== user.uid));
+                                  }
                                 }}
+                                className="form-checkbox h-5 w-5 text-indigo-600"
                             />
-                            <span>{user.displayName || user.email}</span>
+                            <span className="text-slate-800">{user.displayName || user.email}</span>
                           </label>
                       ))}
                     </div>
                   </div>
-                  <div className="flex gap-2 justify-end">
-                    <Button type="button" variant="outline" onClick={() => setShowGroupModal(false)}>Cancel</Button>
-                    <Button type="submit" className="bg-whatsapp-green text-white">Create</Button>
+                  <div className="flex justify-end gap-3">
+                    <Button
+                        type="button"
+                        variant="outline"
+                        className="border-slate-400 text-slate-700 hover:bg-slate-100"
+                        onClick={() => setShowGroupModal(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-5 py-2 rounded-md">
+                      Create
+                    </Button>
                   </div>
                 </form>
               </div>
@@ -162,4 +263,4 @@ const UserList: React.FC<UserListProps> = ({ onSelectUser ,onSelectGroup}) => {
   );
 };
 
-export default UserList; 
+export default UserList;
