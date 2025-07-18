@@ -14,37 +14,19 @@ import {
 } from "lucide-react";
 import { AuthModal } from "../components/AuthModal";
 import {getAuth} from "firebase/auth";
-import ChatRoom from "../components/ChatRoom";
-import UserList from "../components/UserList";
-import GroupChatRoom from "../components/GroupChatRoom.tsx";
 
-interface UserProfile {
-  uid: string;
-  displayName: string;
-  email: string;
-  photoURL?: string;
-}
 const Index = () => {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signup');
-  const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
-  const [currentUser, setCurrentUser] = useState<any>(null);
-  const [selectedTab, setSelectedTab] = useState<'private' | 'group'>('private');
 
   useEffect(() => {
     const auth = getAuth();
-    setCurrentUser(auth.currentUser);
-    // Listen for auth state changes
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      setCurrentUser(user);
-      setSelectedUser(null); // Reset selected user on login/logout
+    
+    const unsubscribe = auth.onAuthStateChanged(() => {
+      
     });
     return () => unsubscribe();
   }, []);
-
-  function getChatId(uid1: string, uid2: string) {
-    return [uid1, uid2].sort().join("_");
-  }
   const features = [
     {
       icon: Zap,
