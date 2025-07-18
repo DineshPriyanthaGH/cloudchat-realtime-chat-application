@@ -13,20 +13,17 @@ A cloud-based real-time chat application built with React and Firebase.
 
 1. Clone the repository:
    ```bash
-   git clone <your-repo-url>
-   cd cloudchat
+   git clone https://github.com/DineshPriyanthaGH/cloudchat-realtime-chat-application.git
+   cd cloudchat-realtime-chat-application
    ```
 2. Install dependencies:
    ```bash
    npm install
    ```
-3. Start the development server:
-   ```bash
-   npm start
-   ```
+
 
 ## Firebase Setup
-- Update `src/firebase.js` with your Firebase project config if needed.
+- Update `src/firebase.Ts` with your Firebase project config if needed.
 - Set Firestore security rules as described below.
 
 ## Firestore Security Rules
@@ -40,12 +37,11 @@ service cloud.firestore {
   }
 }
 ```
+## 🎥 Demo Video
 
-## Demo
-- [Demo Link or attach screen recording here]
+📺 [Watch the Demo](https://drive.google.com/file/d/14_VyMQ1rAvhYhJKivIGPte9jzyfL6FCk/view?usp=drive_link)
 
-## Project Flow Report
-- See `report.pdf` for architecture, technologies, and features.
+---
 
-## License
-MIT
+
+
