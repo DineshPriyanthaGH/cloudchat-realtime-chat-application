@@ -40,7 +40,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ chatId = "global", selectedUser }) 
   const auth = getAuth();
   const user = auth.currentUser;
 
-  const IMGBB_API_KEY = "866d197a9352670200efeb271c0d02be";
+  const IMGBB_API_KEY = "c4bd8b311663c2f4272903a9700ff82e";
 
   const uploadImageToImgbb = async (file: File): Promise<string> => {
     const formData = new FormData();
