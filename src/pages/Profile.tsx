@@ -13,7 +13,7 @@ import { useMessageNotifications } from "../hooks/useNotifications";
 import { Toaster } from "../components/ui/toaster";
 
 // For now, let's create a simple notifications component inline
-const NotificationsPanel = ({ open, onClose, onGoToGroup }: any) => {
+const NotificationsPanel = ({ open, onClose }: { open: boolean; onClose: () => void }) => {
   if (!open) return null;
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -102,12 +102,6 @@ const Profile = () => {
 
   // For notifications
   const handleShowNotifications = () => setNotificationsOpen(true);
-  const handleGoToGroup = (groupId: string) => {
-    setNotificationsOpen(false);
-    // Find group & select it
-    setSelectedGroup({ id: groupId, name: "Group", members: [] });
-    setSelectedUser(null);
-  };
 
   if (!currentUser) {
     return (
@@ -210,7 +204,6 @@ const Profile = () => {
       <NotificationsPanel
         open={notificationsOpen}
         onClose={() => setNotificationsOpen(false)}
-        onGoToGroup={handleGoToGroup}
       />
 
       {/* Toast Notifications */}
