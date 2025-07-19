@@ -9,6 +9,8 @@ import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import { MessageCircle, Users, User, X } from "lucide-react";
 import { Button } from "../components/ui/button";
+import { useMessageNotifications } from "../hooks/useNotifications";
+import { Toaster } from "../components/ui/toaster";
 
 // For now, let's create a simple notifications component inline
 const NotificationsPanel = ({ open, onClose, onGoToGroup }: any) => {
@@ -46,6 +48,20 @@ const Profile = () => {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [notificationsCount, setNotificationsCount] = useState(0);
   const [profileSidebarOpen, setProfileSidebarOpen] = useState(false);
+
+  // Get current chat ID
+  const currentChatId = selectedUser ? getChatId(currentUser?.uid || "", selectedUser.uid) : null;
+  
+  // Enable message notifications
+  useMessageNotifications(
+    currentChatId,
+    selectedGroup?.id || null,
+    {
+      enabled: true,
+      sound: true,
+      desktop: true
+    }
+  );
 
   useEffect(() => {
     const auth = getAuth();
@@ -196,6 +212,9 @@ const Profile = () => {
         onClose={() => setNotificationsOpen(false)}
         onGoToGroup={handleGoToGroup}
       />
+
+      {/* Toast Notifications */}
+      <Toaster />
     </div>
   );
 };

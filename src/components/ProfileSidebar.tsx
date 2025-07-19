@@ -14,7 +14,10 @@ import {
   Eye, 
   EyeOff,
   Info,
-  Settings
+  Settings,
+  Sun,
+  Moon,
+  Monitor
 } from "lucide-react";
 
 interface UserProfileSidebarProps {
@@ -31,10 +34,11 @@ const ProfileSidebar: React.FC<UserProfileSidebarProps> = ({ user, onAvatarUpdat
   const [isOnline, setIsOnline] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
   const [showOnlineStatus, setShowOnlineStatus] = useState(true);
+  const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('system');
   const fileInput = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    // Load user profile data
+    // Load user profile data and theme
     const loadUserData = async () => {
       if (user?.uid) {
         try {
@@ -43,14 +47,47 @@ const ProfileSidebar: React.FC<UserProfileSidebarProps> = ({ user, onAvatarUpdat
             const userData = userDoc.data();
             setAbout(userData.about || "Hey there! I'm using CloudChat.");
             setShowOnlineStatus(userData.showOnlineStatus !== false);
+            setTheme(userData.theme || 'system');
           }
         } catch (error) {
           console.error("Error loading user data:", error);
         }
       }
+      
+      // Load theme from localStorage if no user
+      const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | 'system' || 'system';
+      setTheme(savedTheme);
+      applyTheme(savedTheme);
     };
     loadUserData();
   }, [user]);
+
+  const applyTheme = (newTheme: 'light' | 'dark' | 'system') => {
+    const root = document.documentElement;
+    
+    if (newTheme === 'system') {
+      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      root.classList.toggle('dark', systemTheme === 'dark');
+      root.classList.toggle('light', systemTheme === 'light');
+    } else {
+      root.classList.toggle('dark', newTheme === 'dark');
+      root.classList.toggle('light', newTheme === 'light');
+    }
+  };
+
+  const handleThemeChange = async (newTheme: 'light' | 'dark' | 'system') => {
+    setTheme(newTheme);
+    applyTheme(newTheme);
+    localStorage.setItem('theme', newTheme);
+    
+    if (user?.uid) {
+      try {
+        await updateDoc(doc(db, "users", user.uid), { theme: newTheme });
+      } catch (error) {
+        console.error("Error updating theme:", error);
+      }
+    }
+  };
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -239,26 +276,73 @@ const ProfileSidebar: React.FC<UserProfileSidebarProps> = ({ user, onAvatarUpdat
 
         {/* Privacy Settings */}
         {showSettings && (
-          <div>
-            <label className="flex items-center text-sm font-medium text-muted-foreground mb-3">
-              <Shield className="h-4 w-4 mr-2" />
-              Privacy Settings
-            </label>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 bg-background rounded-lg border border-border">
-                <div className="flex items-center space-x-2">
-                  {showOnlineStatus ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-                  <span className="text-sm">Show Online Status</span>
+          <div className="space-y-6">
+            <div>
+              <label className="flex items-center text-sm font-medium text-muted-foreground mb-3">
+                <Shield className="h-4 w-4 mr-2" />
+                Privacy Settings
+              </label>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 bg-background rounded-lg border border-border">
+                  <div className="flex items-center space-x-2">
+                    {showOnlineStatus ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                    <span className="text-sm">Show Online Status</span>
+                  </div>
+                  <button
+                    onClick={() => handlePrivacyUpdate('showOnlineStatus', !showOnlineStatus)}
+                    className={`w-11 h-6 rounded-full transition-colors ${
+                      showOnlineStatus ? 'bg-primary' : 'bg-gray-300'
+                    }`}
+                  >
+                    <div className={`w-5 h-5 bg-white rounded-full transition-transform ${
+                      showOnlineStatus ? 'translate-x-5' : 'translate-x-0'
+                    }`}></div>
+                  </button>
                 </div>
+              </div>
+            </div>
+
+            {/* Theme Settings */}
+            <div>
+              <label className="flex items-center text-sm font-medium text-muted-foreground mb-3">
+                <Settings className="h-4 w-4 mr-2" />
+                Theme
+              </label>
+              <div className="grid grid-cols-3 gap-2">
                 <button
-                  onClick={() => handlePrivacyUpdate('showOnlineStatus', !showOnlineStatus)}
-                  className={`w-11 h-6 rounded-full transition-colors ${
-                    showOnlineStatus ? 'bg-primary' : 'bg-gray-300'
+                  onClick={() => handleThemeChange('light')}
+                  className={`flex flex-col items-center p-3 rounded-lg border transition-all ${
+                    theme === 'light' 
+                      ? 'border-primary bg-primary/10 text-primary' 
+                      : 'border-border bg-background hover:bg-muted/50'
                   }`}
                 >
-                  <div className={`w-5 h-5 bg-white rounded-full transition-transform ${
-                    showOnlineStatus ? 'translate-x-5' : 'translate-x-0'
-                  }`}></div>
+                  <Sun className="h-4 w-4 mb-1" />
+                  <span className="text-xs">Light</span>
+                </button>
+                
+                <button
+                  onClick={() => handleThemeChange('dark')}
+                  className={`flex flex-col items-center p-3 rounded-lg border transition-all ${
+                    theme === 'dark' 
+                      ? 'border-primary bg-primary/10 text-primary' 
+                      : 'border-border bg-background hover:bg-muted/50'
+                  }`}
+                >
+                  <Moon className="h-4 w-4 mb-1" />
+                  <span className="text-xs">Dark</span>
+                </button>
+                
+                <button
+                  onClick={() => handleThemeChange('system')}
+                  className={`flex flex-col items-center p-3 rounded-lg border transition-all ${
+                    theme === 'system' 
+                      ? 'border-primary bg-primary/10 text-primary' 
+                      : 'border-border bg-background hover:bg-muted/50'
+                  }`}
+                >
+                  <Monitor className="h-4 w-4 mb-1" />
+                  <span className="text-xs">System</span>
                 </button>
               </div>
             </div>

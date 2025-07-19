@@ -11,6 +11,7 @@ import { getAuth } from "firebase/auth";
 import { db } from "../firebaseConfig";
 import { Button } from "./ui/button";
 import EmojiPicker from "emoji-picker-react";
+import { useToast } from "../hooks/use-toast";
 import { 
   User,
   Phone,
@@ -26,6 +27,7 @@ interface Message {
   id: string;
   text: string;
   sender: string;
+  uid: string;
   createdAt: any;
   imageUrl?: string;
 }
@@ -55,6 +57,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ chatId = "global", selectedUser }) 
 
   const auth = getAuth();
   const user = auth.currentUser;
+  const { toast } = useToast();
 
   const IMGBB_API_KEY = "c4bd8b311663c2f4272903a9700ff82e";
 
@@ -87,17 +90,64 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ chatId = "global", selectedUser }) 
 
   useEffect(() => {
     const q = query(collection(db, "chats", chatId, "messages"), orderBy("createdAt", "asc"));
+    let isFirstLoad = true;
+    
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const msgs: Message[] = [];
       querySnapshot.forEach((doc) => {
         msgs.push({ id: doc.id, ...(doc.data() as any) });
       });
+      
+      // Check for new messages (only after initial load)
+      if (!isFirstLoad && user) {
+        querySnapshot.docChanges().forEach((change) => {
+          if (change.type === 'added') {
+            const newMsg = { id: change.doc.id, ...change.doc.data() } as Message;
+            
+            // Don't notify for own messages
+            if (newMsg.uid !== user.uid) {
+              // Show toast notification
+              toast({
+                title: `New message from ${newMsg.sender}`,
+                description: newMsg.text || (newMsg.imageUrl ? "📷 Sent an image" : ""),
+                variant: "default",
+              });
+
+              // Play notification sound
+              try {
+                const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmASBTR6x/DcjT4IDVyz6eas');
+                audio.volume = 0.1;
+                audio.play().catch(() => {
+                  // Fallback for browsers that don't allow audio without user interaction
+                  console.log('🔔 New message notification');
+                });
+              } catch (error) {
+                console.log('🔔 New message notification');
+              }
+
+              // Browser notification (if permission granted)
+              if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification(`New message from ${newMsg.sender}`, {
+                  body: newMsg.text || "📷 Sent an image",
+                  icon: '/favicon.svg',
+                  tag: `message-${newMsg.id}`,
+                });
+              } else if ('Notification' in window && Notification.permission === 'default') {
+                // Request permission
+                Notification.requestPermission();
+              }
+            }
+          }
+        });
+      }
+      
       setMessages(msgs);
       setLoading(false);
+      isFirstLoad = false;
       setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
     });
     return unsubscribe;
-  }, [chatId]);
+  }, [chatId, user, toast]);
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();

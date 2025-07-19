@@ -85,11 +85,11 @@ const Index = () => {
     setAuthMode(mode);
     setShowAuthModal(true);
   };
-  // If logged in, show user list and chat
+  
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
-      {/* Subtle background decoration */}
+     
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/3 rounded-full blur-3xl animate-subtle-float"></div>
         <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-primary/2 rounded-full blur-3xl animate-subtle-float" style={{ animationDelay: '4s' }}></div>
@@ -148,13 +148,7 @@ const Index = () => {
             >
               Sign Up Free
             </Button>
-            <Button 
-              size="lg" 
-              variant="outline"
-              className="border-primary text-primary hover:bg-primary hover:text-primary-foreground px-8 py-4 text-lg transition-all duration-300"
-            >
-              Explore Demo
-            </Button>
+            
           </div>
         </div>
       </section>
