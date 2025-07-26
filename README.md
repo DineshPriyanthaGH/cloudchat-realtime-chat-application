@@ -38,6 +38,7 @@ service cloud.firestore {
 }
 ```
 ## 🎥 Demo Video
+https://youtu.be/DL_W2Y7nIyg?si=b5JvqeW6ptYazevC
 
 📺 [Watch the Demo](https://drive.google.com/file/d/14_VyMQ1rAvhYhJKivIGPte9jzyfL6FCk/view?usp=drive_link)
 
