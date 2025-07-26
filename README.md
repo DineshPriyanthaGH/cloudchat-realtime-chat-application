@@ -1,31 +1,55 @@
-# CloudChat 💬
-
 <div align="center">
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![React](https://img.shields.io/badge/React-19.1.0-blue.svg)](https://reactjs.org/)
-[![Firebase](https://img.shields.io/badge/Firebase-11.10.0-orange.svg)](https://firebase.google.com/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.8.3-blue.svg)](https://www.typescriptlang.org/)
-[![Vite](https://img.shields.io/badge/Vite-7.0.4-green.svg)](https://vitejs.dev/)
+[<img src="https://via.placeholder.com/200x200/4285F4/ffffff?text=💬" width="100" alt="CloudChat logo">](https://github.com/DineshPriyanthaGH/cloudchat-realtime-chat-application)
 
-*A modern, real-time chat application built with React, TypeScript, and Firebase*
+# CloudChat
 
-[Demo Video](https://drive.google.com/file/d/14_VyMQ1rAvhYhJKivIGPte9jzyfL6FCk/view?usp=drive_link) • [Report Bug](https://github.com/DineshPriyanthaGH/cloudchat-realtime-chat-application/issues) • [Request Feature](https://github.com/DineshPriyanthaGH/cloudchat-realtime-chat-application/issues)
+**Open Source Real-Time Chat Application**
+
+[**Live Demo**](https://drive.google.com/file/d/14_VyMQ1rAvhYhJKivIGPte9jzyfL6FCk/view?usp=drive_link) | [**Documentation**](https://github.com/DineshPriyanthaGH/cloudchat-realtime-chat-application#readme) | [**Contributing**](https://github.com/DineshPriyanthaGH/cloudchat-realtime-chat-application/blob/main/CONTRIBUTING.md) | [**Issues**](https://github.com/DineshPriyanthaGH/cloudchat-realtime-chat-application/issues) |
+[**Discussions**](https://github.com/DineshPriyanthaGH/cloudchat-realtime-chat-application/discussions) | [**Security**](https://github.com/DineshPriyanthaGH/cloudchat-realtime-chat-application/blob/main/SECURITY.md)
+
+[![Shield: License MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Shield: Contributions Welcome](https://img.shields.io/badge/Contributions-Welcome-limegreen.svg)](#contributing) [![Shield: React](https://img.shields.io/badge/React-19.1.0-blue.svg)](https://reactjs.org/)
+[![Shield: Firebase](https://img.shields.io/badge/Firebase-11.10.0-orange.svg)](https://firebase.google.com/) [![Shield: TypeScript](https://img.shields.io/badge/TypeScript-5.8.3-blue.svg)](https://www.typescriptlang.org/)
 
 </div>
 
+**CloudChat** is an open source real-time chat application built with modern web technologies. The application empowers users to communicate instantly with secure messaging, group chats, and real-time notifications. Designed for scalability and ease of use with a mobile-first responsive design.
+
+<div align="center">
+
+[<img src="https://via.placeholder.com/600x400/1a202c/ffffff?text=CloudChat+Demo+Preview" width="600" alt="Preview image of CloudChat application">](https://drive.google.com/file/d/14_VyMQ1rAvhYhJKivIGPte9jzyfL6FCk/view?usp=drive_link)
+
+</div>
+
+## Why CloudChat?
+
+CloudChat is for you if you are...
+
+- 💬 looking for a **privacy-focused** chat application
+- 🔒 valuing **end-to-end security** and data ownership
+- 👥 managing **team communications** or group projects
+- 🚀 wanting a **modern, fast** messaging experience
+- 📱 needing **cross-platform** compatibility (mobile & desktop)
+- 🎨 appreciating **clean, intuitive** user interfaces
+- 🛠️ interested in **self-hosting** your chat solution
+- 🌐 requiring **real-time** communication features
+- 💡 contributing to **open source** projects
+- 🆓 preferring **free alternatives** to commercial chat apps
+
 ## ✨ Features
 
-- 🔐 **Secure Authentication** - Firebase Auth with multiple providers
-- 💬 **Real-time Messaging** - Instant message delivery with Firestore
-- 👥 **Group Chats** - Create and manage group conversations
-- 📱 **Responsive Design** - Beautiful UI that works on all devices
-- 🔔 **Push Notifications** - Never miss a message
-- 😀 **Emoji Support** - Express yourself with emoji picker
-- 🌙 **Dark/Light Mode** - Choose your preferred theme
-- 👤 **User Profiles** - Customizable user profiles and avatars
-- 🔒 **Privacy Controls** - Granular privacy settings
-- ⚡ **Real-time Updates** - Live typing indicators and message status
+- ✅ **Secure Authentication** - Firebase Auth with multiple providers
+- ✅ **Real-time Messaging** - Instant message delivery with Firestore
+- ✅ **Group Chats** - Create and manage group conversations
+- ✅ **Responsive Design** - Beautiful UI that works on all devices
+- ✅ **Push Notifications** - Never miss a message
+- ✅ **Emoji Support** - Express yourself with emoji picker
+- ✅ **Dark/Light Mode** - Choose your preferred theme
+- ✅ **User Profiles** - Customizable user profiles and avatars
+- ✅ **Privacy Controls** - Granular privacy settings
+- ✅ **Real-time Updates** - Live typing indicators and message status
 
 ## 🚀 Quick Start
 
@@ -100,6 +124,27 @@
 | **Routing** | React Router |
 | **Styling** | Tailwind CSS, CSS Modules |
 | **Development** | ESLint, TypeScript |
+
+## 🚀 Self-hosting
+
+CloudChat can be easily self-hosted on your own infrastructure. We provide comprehensive documentation and support for various deployment methods.
+
+### Prerequisites
+
+- Node.js 18+ and npm/yarn
+- Firebase project with Firestore and Authentication enabled
+- Basic knowledge of web deployment
+
+### Environment Variables
+
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+| `VITE_FIREBASE_API_KEY` | `string` | | Your Firebase API key |
+| `VITE_FIREBASE_AUTH_DOMAIN` | `string` | | Your Firebase auth domain |
+| `VITE_FIREBASE_PROJECT_ID` | `string` | | Your Firebase project ID |
+| `VITE_FIREBASE_STORAGE_BUCKET` | `string` | | Your Firebase storage bucket |
+| `VITE_FIREBASE_MESSAGING_SENDER_ID` | `string` | | Your Firebase messaging sender ID |
+| `VITE_FIREBASE_APP_ID` | `string` | | Your Firebase app ID |
 
 ## 📁 Project Structure
 
